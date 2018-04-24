@@ -27,6 +27,11 @@ class StockWatcher(base.InLoopPollText):
         self.add_defaults(StockWatcher.defaults)
         self.realtime = [0] * len(self.watch_list)
         self.bfp = [''] * len(self.watch_list)
+        self.hidden = False
+
+    def button_press(self, x, y, button):
+        self.hidden = not self.hidden
+        self.tick()
 
     def tick(self):
         self.update(self.poll())
@@ -45,12 +50,15 @@ class StockWatcher(base.InLoopPollText):
             action = "^"
         else:
             action = ""
-        output = "{}{}({}) ".format(action, self.watch_list[idx][1], self.watch_list[idx][0])
-        if self.realtime[idx]:
-            output += "{}({:.2f}%)".format(self.realtime[idx], (self.realtime[idx] - self.watch_list[idx][4]) * 100  / self.watch_list[idx][4])
-            output += self.bfp[idx]
+        if self.hidden:
+            output = "TWStock"
         else:
-            output += "--"
+            output = "{}{}({}) ".format(action, self.watch_list[idx][1], self.watch_list[idx][0])
+            if self.realtime[idx]:
+                output += "{}({:.2f}%)".format(self.realtime[idx], (self.realtime[idx] - self.watch_list[idx][4]) * 100  / self.watch_list[idx][4])
+                output += self.bfp[idx]
+            else:
+                output += "--"
         return output
 
     def poll(self):

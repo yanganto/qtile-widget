@@ -28,14 +28,16 @@ class StockWatcher(base.InLoopPollText):
         self.realtime = [0] * len(self.watch_list)
         self.bfp = [''] * len(self.watch_list)
         self.hidden = False
+        self.stop = False
 
     def button_press(self, x, y, button):
         self.hidden = not self.hidden
+        self.stop = True if button == 3 and self.hidden else False
         self.tick()
 
     def tick(self):
         self.update(self.poll())
-        if int(datetime.now().timestamp()) % self.stock_update_interval == 0:
+        if int(datetime.now().timestamp()) % self.stock_update_interval == 0 and not self.stop:
             for idx in range(len(self.watch_list)):
                 threading.Thread(target=real_time_query_worker,
                                  args=(self.realtime, self.bfp, idx, self.watch_list[idx][0])).start()
@@ -51,7 +53,7 @@ class StockWatcher(base.InLoopPollText):
         else:
             action = ""
         if self.hidden:
-            output = "TWStock"
+            output = "TWStock" if self.stop else "TWStock&"
         else:
             output = "{}{}({}) ".format(action, self.watch_list[idx][1], self.watch_list[idx][0])
             if self.realtime[idx]:

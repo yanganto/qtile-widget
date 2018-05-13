@@ -31,8 +31,18 @@ class StockWatcher(base.InLoopPollText):
         self.stop = False
 
     def button_press(self, x, y, button):
-        self.hidden = not self.hidden
-        self.stop = True if button == 3 and self.hidden else False
+        """ mode swticth by button press
+        left button(1) to tick
+        right button(2) to change mode normal -> background(hidden) -> stop (hidden and stop)
+        """
+        if button == 3:
+            if self.stop:
+                self.stop = False
+                self.hidden = False
+            elif self.hidden:
+                self.stop = True
+            else:
+                self.hidden = True
         self.tick()
 
     def tick(self):
